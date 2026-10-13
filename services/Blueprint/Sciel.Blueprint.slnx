@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Sciel.Blueprint.Core/Sciel.Blueprint.Core.csproj" />
+    <Project Path="src/Sciel.Blueprint.Data/Sciel.Blueprint.Data.csproj" />
+    <Project Path="src/Sciel.Blueprint.Service/Sciel.Blueprint.Service.csproj" />
+  </Folder>
+</Solution>
