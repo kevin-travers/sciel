@@ -55,6 +55,23 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
         builder.HasIndex(category => new { category.OrganizationId, category.SpaceId, category.Name })
             .IsUnique();
 
+        // TODO: BUG — these filters capture _requestContext from THIS CategoryConfiguration
+        // instance, but OnModelCreating (and therefore `new CategoryConfiguration(...)`) only
+        // runs ONCE per DbContext type — the model is built once and cached, then reused by
+        // every later BlueprintDbContext instance/request. EF Core only re-evaluates a query
+        // filter per executing instance when it references a field directly on the DbContext
+        // subclass itself (a documented `this.field` pattern); a field on a separate
+        // IEntityTypeConfiguration class gets eagerly evaluated into the model once instead.
+        // Net effect: whichever request happens to build the model first gets its
+        // OrganizationId/SpaceId permanently baked in, and every other tenant's requests would
+        // silently filter against THAT tenant — a real cross-tenant data leak.
+        // Possible fix: move these two HasQueryFilter calls out of CategoryConfiguration and
+        // into BlueprintDbContext.OnModelCreating directly, referencing a `_requestContext`
+        // field that lives on BlueprintDbContext itself (not on CategoryConfiguration).
+        // CategoryConfiguration keeps everything else (table, keys, indexes). Repeat for every
+        // future aggregate's filters too.
+        // Source: https://github.com/dotnet/efcore/issues/14740
+        //
         // Named separately (EF Core 10+) so a query can selectively bypass just the
         // soft-delete filter (e.g. to restore a category) without also losing tenant
         // isolation, which a single combined filter + IgnoreQueryFilters() could not do safely.
