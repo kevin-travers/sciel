@@ -22,3 +22,4 @@ public class CategoryResponse
     /// </summary>
     public string? Description { get; set; }
 }
+

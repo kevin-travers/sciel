@@ -1,6 +1,11 @@
 // Sets up configuration (appsettings.json, env vars, command-line args), logging, and the
 // DI service collection. Nothing is "built" yet — this is just the configuration stage.
+using Microsoft.EntityFrameworkCore;
+using Sciel.Blueprint.Data;
 using Sciel.Blueprint.Service.Categoires;
+using Sciel.Blueprint.Core.Common;
+using Sciel.Blueprint.Core.Categories;
+using Sciel.Blueprint.Data.Categories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +13,32 @@ var builder = WebApplication.CreateBuilder(args);
 // JSON describing this API's routes and schemas.
 builder.Services.AddOpenApi();
 
+// Reads the "ConnectionStrings:Blueprint" key out of the layered configuration
+// (appsettings.json -> appsettings.<Environment>.json -> user secrets in
+// Development -> environment variables, each overriding the last). Locally this
+// comes from "dotnet user-secrets set ConnectionStrings:Blueprint ..." so the real
+// Postgres credentials never land in a file that gets committed; in production the
+// same key is supplied via a ConnectionStrings__Blueprint environment variable.
+var connectionString = builder.Configuration.GetConnectionString("Blueprint");
+
+// Registers BlueprintDbContext in DI as scoped (one instance per HTTP request),
+// configured to talk to Postgres via Npgsql using the connection string above.
+// Anything downstream — a repository, an endpoint handler — can now just take a
+// BlueprintDbContext parameter and have it injected automatically.
+builder.Services.AddDbContext<BlueprintDbContext>(options => 
+    options.UseNpgsql(connectionString));
+
+builder.Services.AddScoped<IRequestContext>(_ => new RequestContext
+{
+    UserId = Guid.Parse("11111111-1111-1111-1111-111111111111"),
+    OrganizationId = Guid.Parse("22222222-2222-2222-2222-222222222222"),
+    SpaceId = Guid.Parse("33333333-3333-3333-3333-333333333333"),
+    AccessToken = "dev-token"
+});
+
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+
+// TODO: add logging
 // Finalizes the DI container and produces the actual runnable WebApplication. After this
 // line you can no longer register new services — only configure the middleware pipeline/routes.
 var app = builder.Build();

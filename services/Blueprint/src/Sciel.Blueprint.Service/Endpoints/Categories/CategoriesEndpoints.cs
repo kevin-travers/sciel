@@ -20,35 +20,46 @@ public static class CategoriesEnpoints
         group.MapDelete("{id}", DeleteCategory);
     }
 
-    public static Results<Ok<CategoryResponse>, NotFound<string>> GetCategory(
-        Guid id)
+    public static async Task<Results<Ok<CategoryResponse>, NotFound<string>>> GetCategory(
+        Guid id,
+        ICategoryRepository categoryRepository,
+        CancellationToken ct)
     {
         try
         {
-            var category = new CategoryResponse()
-            {
-                Id = id,
-                Name = "MyFakeName",
-                Description = "This Category is fake",
-            };
-            return TypedResults.Ok(category);
+            var category = await categoryRepository.GetByIdAsync(id,ct);
+            if(category is null)
+                throw new Exception($"Category Id:{id} not found");
+            return TypedResults.Ok(category.ToCategoryResponse());
         }
         catch(Exception ex){
             return TypedResults.NotFound(ex.Message);
         }
     }
-    public static Results<Created<CategoryResponse>,BadRequest<string>> CreateCategory(CreateCategoryRequest request)
+    public static async Task<Results<Created<CategoryResponse>,BadRequest<string>>> CreateCategory(
+        CreateCategoryRequest request,
+        ICategoryRepository categoryRepository,
+        CancellationToken ct)
     {
-        var category = new CategoryResponse()
+        try
         {
-            Id = new Guid(),
-            Name = request.Name,
-            Description = request.Description,
-        };
-        return TypedResults.Created($"api/categories/{category.Id}", category);
+            var category = await categoryRepository.AddAsync(request.ToCategory(), ct);
+            return TypedResults.Created($"api/categories/{category.Id}", category.ToCategoryResponse());
+        }
+        catch(Exception ex){
+            return TypedResults.BadRequest(ex.Message);
+        } 
     }
-    public static Results<NoContent,NotFound<string>> DeleteCategory(Guid id)
+    public static async Task<Results<NoContent,NotFound<string>>> DeleteCategory(
+        Guid id,
+        ICategoryRepository categoryRepository,
+        CancellationToken ct)
     {
+        var category = await categoryRepository.GetByIdAsync(id, ct);
+        if (category is null)
+            return TypedResults.NotFound($"Category {id} not found.");
+
+        await categoryRepository.RemoveAsync(category, ct);
         return TypedResults.NoContent();
     }
 }

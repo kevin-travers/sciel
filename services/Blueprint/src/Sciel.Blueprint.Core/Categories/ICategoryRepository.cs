@@ -32,7 +32,7 @@ public interface ICategoryRepository
     /// <see cref="Category.CreatedAtUtc"/>/<see cref="Category.UpdatedAtUtc"/> are
     /// database-generated, not set here.
     /// </summary>
-    Task AddAsync(Category category, CancellationToken ct = default);
+    Task<Category> AddAsync(Category category, CancellationToken ct = default);
 
     /// <summary>
     /// Persists changes to an existing category. <see cref="Category.UpdatedAtUtc"/> is kept
