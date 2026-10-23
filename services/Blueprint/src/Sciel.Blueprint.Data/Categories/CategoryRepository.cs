@@ -1,13 +1,13 @@
-namespace Sciel.Blueprint.Data.Categories;
-
 using Sciel.Blueprint.Core.Categories;
 using Sciel.Blueprint.Core.Common;
 using Microsoft.EntityFrameworkCore;
 
+namespace Sciel.Blueprint.Data.Categories;
+
 public class CategoryRepository: ICategoryRepository
 {
-  protected readonly BlueprintDbContext _dbContext;
-  protected readonly IRequestContext _requestContext;
+  private readonly BlueprintDbContext _dbContext;
+  private readonly IRequestContext _requestContext;
   public CategoryRepository(BlueprintDbContext dbContext, IRequestContext requestContext)
   {
     _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
@@ -24,34 +24,38 @@ public class CategoryRepository: ICategoryRepository
       ct);
 
   /// <inheritdoc />
-  public Task<PagedResult<Category>> GetAllAsync(string? nameFilter, int paged, int pageSize, CancellationToken ct)
+  public Task<PagedResult<Category>> GetAllAsync(string? nameFilter, int page, int pageSize, CancellationToken ct)
   {
     throw new NotImplementedException();
   }
 
   /// <inheritdoc />
-  public async Task<Category> AddAsync(Category cateogry, CancellationToken ct)
+  public async Task<Category> AddAsync(Category category, CancellationToken ct)
   {
-    // TODO: change to have DB make the ID
-    cateogry.Id =Guid.NewGuid();
-    cateogry.OrganizationId = _requestContext.OrganizationId;
-    cateogry.SpaceId = _requestContext.SpaceId;
-    await _dbContext.Categories.AddAsync(cateogry,ct);
+    ArgumentNullException.ThrowIfNull(category);
+
+    // change to have DB make the ID
+    category.Id = Guid.NewGuid();
+    category.OrganizationId = _requestContext.OrganizationId;
+    category.SpaceId = _requestContext.SpaceId;
+    await _dbContext.Categories.AddAsync(category,ct);
     await _dbContext.SaveChangesAsync(ct);
-    return cateogry;
+    return category;
   }
 
   /// <inheritdoc />
-  public Task UpdateAsync(Category cateogry, CancellationToken ct)
+  public Task UpdateAsync(Category category, CancellationToken ct)
   {
     throw new NotImplementedException();
   }
 
   /// <inheritdoc />
-  public async Task RemoveAsync(Category cateogry, CancellationToken ct)
+  public async Task RemoveAsync(Category category, CancellationToken ct)
   {
-    // TODO: Have the database set the time not application code
-    cateogry.DeletedAtUtc = DateTime.UtcNow;
+    ArgumentNullException.ThrowIfNull(category);
+
+    // Have the database set the time not application code
+    category.DeletedAtUtc = DateTime.UtcNow;
     await _dbContext.SaveChangesAsync(ct);
   }
 

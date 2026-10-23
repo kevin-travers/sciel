@@ -1,8 +1,8 @@
-namespace Sciel.Blueprint.Data;
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+
+namespace Sciel.Blueprint.Data;
 
 /// <summary>
 /// Design-time factory for <see cref="BlueprintDbContext"/>.
@@ -37,19 +37,19 @@ public class BlueprintDbContextFactory : IDesignTimeDbContextFactory<BlueprintDb
         // normally reads to decide which appsettings.<Environment>.json to layer in.
         // Defaults to "Development" because that's the environment you're almost
         // always in when you're the one typing "dotnet ef ..." by hand at a terminal.
-        var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+        string environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
             ?? "Development";
 
         // The ef CLI resolves this factory from the Sciel.Blueprint.Data project, but
         // the appsettings*.json files actually live in Sciel.Blueprint.Service. So the
         // base path has to be pointed explicitly at the Service project's directory,
         // relative to where this factory assembly sits on disk (its bin/Debug/... folder).
-        var servicePath = Path.Combine(
+        string servicePath = Path.Combine(
             AppContext.BaseDirectory,
             "..", "..", "..", "..",
             "Sciel.Blueprint.Service");
 
-        var configuration = new ConfigurationBuilder()
+        IConfigurationRoot configuration = new ConfigurationBuilder()
             .SetBasePath(servicePath)
 
             // Base settings, committed to source control. Should NOT contain the real
@@ -87,7 +87,7 @@ public class BlueprintDbContextFactory : IDesignTimeDbContextFactory<BlueprintDb
         // "Blueprint" here must match the same key used everywhere else — e.g.
         // builder.Configuration.GetConnectionString("Blueprint") in Program.cs,
         // and whatever key appsettings.json / user-secrets / the env var above use.
-        var connectionString = configuration.GetConnectionString("Blueprint");
+        string? connectionString = configuration.GetConnectionString("Blueprint");
 
         if (string.IsNullOrWhiteSpace(connectionString))
         {
@@ -101,7 +101,7 @@ public class BlueprintDbContextFactory : IDesignTimeDbContextFactory<BlueprintDb
         // Builds the same kind of DbContextOptions<BlueprintDbContext> that
         // AddDbContext<BlueprintDbContext>(...) would build at normal app startup —
         // just assembled by hand here instead of coming out of the DI container.
-        var optionsBuilder = new DbContextOptionsBuilder<BlueprintDbContext>()
+        DbContextOptionsBuilder<BlueprintDbContext> optionsBuilder = new DbContextOptionsBuilder<BlueprintDbContext>()
             .UseNpgsql(connectionString);
 
         // BlueprintDbContext's constructor currently only takes DbContextOptions —

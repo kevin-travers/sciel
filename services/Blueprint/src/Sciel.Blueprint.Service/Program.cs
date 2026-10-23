@@ -7,7 +7,7 @@ using Sciel.Blueprint.Core.Common;
 using Sciel.Blueprint.Core.Categories;
 using Sciel.Blueprint.Data.Categories;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Registers .NET's built-in OpenAPI document generator, which produces the OpenAPI/Swagger
 // JSON describing this API's routes and schemas.
@@ -19,7 +19,7 @@ builder.Services.AddOpenApi();
 // comes from "dotnet user-secrets set ConnectionStrings:Blueprint ..." so the real
 // Postgres credentials never land in a file that gets committed; in production the
 // same key is supplied via a ConnectionStrings__Blueprint environment variable.
-var connectionString = builder.Configuration.GetConnectionString("Blueprint");
+string? connectionString = builder.Configuration.GetConnectionString("Blueprint");
 
 // Registers BlueprintDbContext in DI as scoped (one instance per HTTP request),
 // configured to talk to Postgres via Npgsql using the connection string above.
@@ -41,7 +41,7 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 // TODO: add logging
 // Finalizes the DI container and produces the actual runnable WebApplication. After this
 // line you can no longer register new services — only configure the middleware pipeline/routes.
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 // Checks the hosting environment (set via ASPNETCORE_ENVIRONMENT or the launch profile).
 if(app.Environment.IsDevelopment())
@@ -63,4 +63,4 @@ app.UseHttpsRedirection();
 // TODO: app.MapCategoryEndpoints(); etc. once the minimal API endpoint extensions exist.
 app.MapCategoryEndpoints();
 // Starts the Kestrel server and blocks, listening for requests until the process stops.
-app.Run();
+await app.RunAsync();

@@ -12,7 +12,7 @@ public class CategoryResponse
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Display name shown in the UI (e.g. "Networking")a Must be unique within the
+    /// The category name. Must be unique within the
     /// owning organization and space.
     /// </summary>
     public required string Name { get; set; }

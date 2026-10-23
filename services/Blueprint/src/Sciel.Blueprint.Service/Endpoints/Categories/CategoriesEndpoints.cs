@@ -1,4 +1,3 @@
-namespace Sciel.Blueprint.Service.Categoires;
 
 using Npgsql.Replication;
 using Sciel.Blueprint.Core.Categories;
@@ -9,6 +8,8 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+
+namespace Sciel.Blueprint.Service.Categoires;
 
 public static class CategoriesEnpoints
 {

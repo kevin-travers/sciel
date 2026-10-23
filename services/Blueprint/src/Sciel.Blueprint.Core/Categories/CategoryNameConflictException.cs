@@ -18,4 +18,16 @@ public class CategoryNameConflictException : Exception
     {
         Name = name;
     }
+
+    public CategoryNameConflictException()
+        : base("A category name conflict occurred.")
+    {
+        Name = string.Empty;
+    }
+
+    public CategoryNameConflictException(string message, Exception innerException)
+        : base(message, innerException)
+    {
+        Name = string.Empty;
+    }
 }

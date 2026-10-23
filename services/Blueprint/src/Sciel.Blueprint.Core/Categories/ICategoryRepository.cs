@@ -11,7 +11,7 @@ public interface ICategoryRepository
     /// Looks up a category by id, scoped to the current tenant.
     /// </summary>
     /// <returns>The matching category, or <c>null</c> if none exists (or it's soft-deleted).</returns>
-    Task<Category?> GetByIdAsync(Guid id, CancellationToken ct = default);
+    Task<Category?> GetByIdAsync(Guid id, CancellationToken ct);
 
     /// <summary>
     /// Returns a page of categories for the current tenant, optionally filtered by a
@@ -24,7 +24,7 @@ public interface ICategoryRepository
         string? nameFilter,
         int page,
         int pageSize,
-        CancellationToken ct = default);
+        CancellationToken ct);
 
     /// <summary>
     /// Adds a new category. The repository stamps <see cref="Category.OrganizationId"/> and
@@ -32,19 +32,19 @@ public interface ICategoryRepository
     /// <see cref="Category.CreatedAtUtc"/>/<see cref="Category.UpdatedAtUtc"/> are
     /// database-generated, not set here.
     /// </summary>
-    Task<Category> AddAsync(Category category, CancellationToken ct = default);
+    Task<Category> AddAsync(Category category, CancellationToken ct);
 
     /// <summary>
     /// Persists changes to an existing category. <see cref="Category.UpdatedAtUtc"/> is kept
     /// current by a database trigger, not set here.
     /// </summary>
-    Task UpdateAsync(Category category, CancellationToken ct = default);
+    Task UpdateAsync(Category category, CancellationToken ct);
 
     /// <summary>
     /// Soft-deletes a category by stamping <see cref="Category.DeletedAtUtc"/>. Does not
     /// remove the row — callers must have already loaded the entity to pass in.
     /// </summary>
-    Task RemoveAsync(Category category, CancellationToken ct = default);
+    Task RemoveAsync(Category category, CancellationToken ct);
 
     /// <summary>
     /// Returns a page of soft-deleted categories for the current tenant, optionally filtered
@@ -58,11 +58,11 @@ public interface ICategoryRepository
         string? nameFilter,
         int page,
         int pageSize,
-        CancellationToken ct = default);
+        CancellationToken ct);
 
     /// <summary>
     /// Restores a soft-deleted category by id, clearing <see cref="Category.DeletedAtUtc"/>.
     /// </summary>
     /// <returns>The restored category, or <c>null</c> if no soft-deleted category with this id exists for the current tenant.</returns>
-    Task<Category?> RestoreAsync(Guid id, CancellationToken ct = default);
+    Task<Category?> RestoreAsync(Guid id, CancellationToken ct);
 }
